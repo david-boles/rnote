@@ -111,5 +111,70 @@ If you don't like rnote, or decided that is not worth your precious disk space, 
 sudo ninja uninstall -C _mesonbuild
 ```
 
+#### Example Development Environment Setup
+These instructions assume you use a Debian-based distro but should be easy to adapt to other environments:
+
+1. Install VSCode and debugging extensions:
+    - https://code.visualstudio.com/
+    - https://marketplace.visualstudio.com/items?itemName=matklad.rust-analyzer
+    - https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb
+2. Clone the repository:
+    ```bash
+    git clone https://github.com/flxzt/rnote.git
+    cd rnote
+    git submodule update --init
+    ```
+3. Install GTK4: https://gtk-rs.org/gtk4-rs/stable/latest/book/installation.html
+4. Install additional dependencies:
+    ```bash
+    sudo apt install    \
+    libadwaita-1-dev    \
+    libasound2-dev      \
+    libgstreamer1.0-dev \
+    libpoppler-glib-dev
+    ```
+5. Set up Meson for in-place development builds:
+    ```bash
+    meson setup --prefix=$(pwd)/_mesoninstall -Dprofile=devel _mesonbuild
+    ```
+6. Create a task in `.vscode/tasks.json` for building Rnote:
+    ```json
+    {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "Build Rnote",
+                "type": "shell",
+                "command": "meson compile -C _mesonbuild && meson install -C _mesonbuild",
+                "options": {
+                    "cwd": "${workspaceFolder}"
+                }
+            }
+        ]
+    }
+    ```
+7. Create a launch configuration in `.vscode/launch.json` for debugging Rnote:
+    ```json
+    {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "type": "lldb",
+                "request": "custom",
+                "name": "Debug Rnote",
+                "preLaunchTask": "Build Rnote",
+                "targetCreateCommands": [
+                    "target create ${workspaceFolder}/_mesoninstall/bin/rnote"
+                ],
+                "processCreateCommands": [
+                    // Optionally, arguments:
+                    // "settings set target.run-args value1 value2 value3",
+                    "process launch"
+                ]
+            }
+        ]
+    }
+    ```
+
 # Contribute
 Please open an issue or ask in the `Github Discussions` section if you need help with anything!
