@@ -113,3 +113,51 @@ sudo ninja uninstall -C _mesonbuild
 
 # Contribute
 Please open an issue or ask in the `Github Discussions` section if you need help with anything!
+
+
+
+
+TODO:
+meson setup --prefix=$(pwd)/_mesoninstall -Dprofile=devel _mesonbuild
+
+.vscode/tasks.json
+
+```json
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Rnote",
+            "type": "shell",
+            "command": "meson compile -C _mesonbuild && meson install -C _mesonbuild",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        }
+    ]
+}
+```
+
+.vscode/launch.json
+
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "custom",
+            "name": "Debug Rnote",
+            "preLaunchTask": "Build Rnote",
+            "targetCreateCommands": [
+                "target create ${workspaceFolder}/_mesoninstall/bin/rnote"
+            ],
+            "processCreateCommands": [
+                // Optionally, arguments:
+                // "settings set target.run-args value1 value2 value3",
+                "process launch"
+            ]
+        }
+    ]
+}
+```
